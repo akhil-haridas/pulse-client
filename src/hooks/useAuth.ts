@@ -1,24 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getProfile, login as loginApi, logout as logoutApi } from "@api/auth";
+import {
+    getProfile,
+    login as loginRequest,
+    logout as logoutRequest,
+} from "@api";
 
 export const useAuth = () => {
     const queryClient = useQueryClient();
 
-    const { data: user, isLoading, isError } = useQuery({
+    const {
+        data: user,
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ["me"],
         queryFn: getProfile,
-        retry: false, // don't retry if unauthenticated
+        retry: false,
     });
 
     const login = useMutation({
-        mutationFn: loginApi,
+        mutationFn: loginRequest,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["me"] });
         },
     });
 
     const logout = useMutation({
-        mutationFn: logoutApi,
+        mutationFn: logoutRequest,
         onSuccess: () => {
             queryClient.removeQueries({ queryKey: ["me"] });
         },
