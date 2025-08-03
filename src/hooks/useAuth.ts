@@ -1,9 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    getProfile,
-    login as loginRequest,
-    logout as logoutRequest,
-} from "@api";
+import { getProfile, login, logout, register } from "@api";
+
+const queryKey = ["authUser"];
 
 export const useAuth = () => {
     const queryClient = useQueryClient();
@@ -12,23 +10,33 @@ export const useAuth = () => {
         data: user,
         isLoading,
         isError,
+        error,
+        refetch,
+        isFetched,
     } = useQuery({
-        queryKey: ["me"],
-        queryFn: getProfile,
+        queryKey,
+        queryFn: async () => (await getProfile()).data.user,
         retry: false,
     });
 
-    const login = useMutation({
-        mutationFn: loginRequest,
+    const loginMutation = useMutation({
+        mutationFn: login,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["me"] });
+            queryClient.invalidateQueries({ queryKey });
         },
     });
 
-    const logout = useMutation({
-        mutationFn: logoutRequest,
+    const registerMutation = useMutation({
+        mutationFn: register,
         onSuccess: () => {
-            queryClient.removeQueries({ queryKey: ["me"] });
+            queryClient.invalidateQueries({ queryKey });
+        },
+    });
+
+    const logoutMutation = useMutation({
+        mutationFn: logout,
+        onSuccess: () => {
+            queryClient.removeQueries({ queryKey });
         },
     });
 
@@ -36,7 +44,11 @@ export const useAuth = () => {
         user,
         isLoading,
         isError,
-        login: login.mutateAsync,
-        logout: logout.mutateAsync,
+        error,
+        isFetched,
+        login: loginMutation.mutateAsync,
+        register: registerMutation.mutateAsync,
+        logout: logoutMutation.mutateAsync,
+        refetchUser: refetch,
     };
 };

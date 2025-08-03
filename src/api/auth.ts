@@ -11,8 +11,13 @@ export const register = async (payload: { name: string; email: string; password:
 };
 
 export const getProfile = async () => {
-    const res = await api.get("/auth/profile");
+    const res = await api.get("/user/me");
     return res.data.user;
+};
+
+export const refresh = async () => {
+    const res = await api.post("/auth/refresh")
+    return res.data
 };
 
 export const logout = async () => {
